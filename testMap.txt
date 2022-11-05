@@ -1,0 +1,7 @@
+﻿size;7;7
+start;3;6
+gold;4;1
+gold;2;2
+gold;6;3
+gold;1;4
+gold;4;5
