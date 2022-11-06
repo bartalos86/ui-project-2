@@ -6,29 +6,36 @@ using System.Threading.Tasks;
 
 namespace genetic_algorithm
 {
-    public class VirtualMachine
+    public class VirtualMachine : IComparable<VirtualMachine>
     {
         public List<Memory> Memory { get; set; }
         public List<Step> Steps { get; private set; }
         public double Fitness { get; private set; }
 
-        private Func<List<Step>,bool> swarmBoundControl;
+        private Func<List<Step>, (bool, int)> swarmBoundControl;
+        private int customSize = 64;
+        private int customBits;
 
-        public VirtualMachine(Func<List<Step>, bool> swarmBoundsControl)
+        public VirtualMachine(Func<List<Step>, (bool,int)> swarmBoundsControl, int customSize = 64)
         {
             this.swarmBoundControl = swarmBoundsControl;
             Memory = new List<Memory>();
-            InitializeMachine();
+            InitializeMachine(customSize);
         }
 
-        private void InitializeMachine()
+        private void InitializeMachine(int customSize)
         {
-            for (int i = 0; i < 64; i++)
+            this.customSize = customSize;
+            this.customBits = (int) Math.Ceiling(Math.Log2(customSize)) + 2;
+            int nearestSize = (int) Math.Pow(2, customBits-2);
+            
+
+            for (int i = 0; i < nearestSize; i++)
             {
-                var binaryValue = GenerateBinaryValue();
+                var binaryValue = GenerateBinaryValue(customBits);
                 var binaryAddress = GenerateAddress(i);
 
-                var memory = new Memory(binaryAddress, binaryValue);
+                var memory = new Memory(binaryAddress, binaryValue, customBits);
                 Memory.Add(memory);
             }
         }
@@ -66,14 +73,16 @@ namespace genetic_algorithm
                 }else if(instuction == Instruction.JUMP)
                 {
                     i = targetAddressIndex -1;
-                    continue;
                 }else if(instuction == Instruction.PRINT)
                 {
                     Steps = GetSteps();
 
-                    if (!IsInBounds())
+                    if (!IsInBounds().Item1)
+                    {
+                        Steps.RemoveRange(IsInBounds().Item2, Steps.Count - IsInBounds().Item2);
                         break;
-   
+                    }
+
                 }
             }
 
@@ -93,18 +102,18 @@ namespace genetic_algorithm
             return steps;
         }
 
-        private bool IsInBounds()
+        private (bool, int) IsInBounds()
         {
-            return swarmBoundControl.Invoke(GetSteps());
+            return swarmBoundControl.Invoke(Steps);
         }
 
 
-        private static string GenerateAddress(int number)
+        private string GenerateAddress(int number)
         {
             var binaryAddress = new StringBuilder(Convert.ToString(number, 2));
             Random random = new Random();
 
-            while (binaryAddress.Length < 6)
+            while (binaryAddress.Length < customSize-2)
             {
                 binaryAddress.Insert(0, "0");
             }
@@ -130,6 +139,14 @@ namespace genetic_algorithm
             }
 
             return value.ToString();
+        }
+
+        public int CompareTo(VirtualMachine? other)
+        {
+            if (other == null)
+                return 1;
+
+            return this.Fitness.CompareTo(other.Fitness);
         }
     }
 }

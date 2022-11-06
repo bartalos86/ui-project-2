@@ -1,20 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace genetic_algorithm
 {
+    [Serializable]
     public class Memory
     {
         public string Address { get; set; }
         public string Value { get; set; }
 
-        public Memory(string address, string value)
+        private int customSizeBits = 8;
+
+        public Memory(string address, string value, int customSizeBits = 8)
         {
             Address = address;
             Value = value;
+            this.customSizeBits = customSizeBits;
         }
 
         public Instruction GetInstruction()
@@ -34,12 +33,17 @@ namespace genetic_algorithm
 
             if(intValue > 255)
             {
-                value = "00000000";
+                value = "0000000";
+
+                //while (value.Length < customSizeBits)
+                //{
+                //    value = value.Insert(0, "0");
+                //}
             }
             else
             {
                 value = Convert.ToString(intValue, 2);
-                while (value.Length < 8)
+                while (value.Length < customSizeBits)
                 {
                    value = value.Insert(0, "0");
                 }
@@ -55,12 +59,16 @@ namespace genetic_algorithm
 
             if (intValue <= 0)
             {
-                value = "11111111";
+                value = "1111111";
+                //while (value.Length < customSizeBits)
+                //{
+                //    value = value.Insert(0, "1");
+                //}
             }
             else
             {
                 value = Convert.ToString(intValue, 2);
-                while (value.Length < 8)
+                while (value.Length < customSizeBits)
                 {
                     value = value.Insert(0, "0");
                 }
@@ -83,11 +91,16 @@ namespace genetic_algorithm
                     numberOfOnes++;
             }
 
-            if (numberOfOnes <= 2)
+            int intervalAdjustment = (customSizeBits - 8); //12
+            //1 0-4 -5
+            //2 5-6 -2
+            //4 7-8 -4
+
+            if (numberOfOnes <= 2 + intervalAdjustment / 4)
                 return Step.H;
-            else if (numberOfOnes <= 4)
+            else if (numberOfOnes <= 4 + intervalAdjustment /2)
                 return Step.D;
-            else if (numberOfOnes <= 6)
+            else if (numberOfOnes <= 6 + intervalAdjustment)
                 return Step.P;
             else
                 return Step.L;

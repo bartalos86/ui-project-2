@@ -7,16 +7,18 @@ namespace genetic_algorithm
     {
         public static void Main(string[] args)
         {
-            //VirtualMachine virtualMachine = new VirtualMachine();
-            //virtualMachine.PrintOutMemory();
-            //virtualMachine.DoGeneration();
-            AICollection swarm = new AICollection();
-            swarm.InitializeAIs(20);
+            AICollection swarm = new AICollection(0.01);
+            string file = args.Length > 0 ? args[0] : "testMap.txt";
 
-            Map startingMap = ReadMap("testMap.txt");
+            Map startingMap = ReadMap(file);
             startingMap.PrintMap();
             swarm.SetupMap(startingMap);
-            swarm.DoGeneration();
+            swarm.InitializeAIs(20);
+
+
+
+            while (!swarm.SolutionFound)
+                swarm.DoGeneration();
 
 
         }

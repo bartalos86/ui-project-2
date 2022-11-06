@@ -1,0 +1,10 @@
+﻿size;20;20
+start;10;19
+gold;5;7
+gold;8;5
+gold;2;15
+gold;6;8
+gold;18;18
+gold;15;7
+gold;17;1
+gold;1;1
