@@ -15,8 +15,6 @@ namespace genetic_algorithm
             swarm.SetupMap(startingMap);
             swarm.InitializeAIs(20);
 
-
-
             while (!swarm.SolutionFound)
                 swarm.DoGeneration();
 

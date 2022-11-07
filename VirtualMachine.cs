@@ -58,7 +58,6 @@ namespace genetic_algorithm
                 var targetAddress = memory.GetValue();
                 var targetAddressIndex = Convert.ToInt32(targetAddress,2);
                 //Console.WriteLine(instuction + ": " + targetAddressIndex);
-
                 if (instructionCounter >= 500)
                     break;
 
@@ -75,11 +74,14 @@ namespace genetic_algorithm
                     i = targetAddressIndex -1;
                 }else if(instuction == Instruction.PRINT)
                 {
-                    Steps = GetSteps();
+                    if(Steps == null)
+                    Steps ??= new List<Step>();
+                    Steps.Add(Memory[targetAddressIndex].GetStep());
 
                     if (!IsInBounds().Item1)
                     {
-                        Steps.RemoveRange(IsInBounds().Item2, Steps.Count - IsInBounds().Item2);
+                        //Steps.RemoveRange(IsInBounds().Item2, Steps.Count - IsInBounds().Item2);
+                        Steps.RemoveAt(Steps.Count - 1);
                         break;
                     }
 

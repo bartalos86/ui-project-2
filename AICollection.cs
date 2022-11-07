@@ -17,7 +17,7 @@ namespace genetic_algorithm
 
         private double maxPossibleFitness;
         private int customSize = 64;
-        private Func<double> goldWorth = () => 5;
+        private Func<double> goldWorth = () => 2;
 
         public AICollection(double chanceOfMutation = 0.01)
         {
@@ -110,6 +110,12 @@ namespace genetic_algorithm
                
             }
 
+            for(int i  = 0; i< VirtualMachines.Count /4; i++)
+            {
+                if (!successfulAIs.Contains(VirtualMachines[i]))
+                    successfulAIs.Add(VirtualMachines[i]);
+            }
+
            
 
             //No AIs were picked
@@ -120,7 +126,8 @@ namespace genetic_algorithm
             }
 
             int maxCap = successfulAIs.Count <= MaxAIs ? successfulAIs.Count : MaxAIs;
-
+            successfulAIs.Sort();
+            successfulAIs.Reverse();
            var newGeneration = new List<VirtualMachine>();
            for(int i = 0; i < maxCap; i++)
             {
@@ -128,7 +135,7 @@ namespace genetic_algorithm
 
                 for (int j = i + 1;j < maxCap; j++)
                 {
-                    var newChild = Crossover(successfulAIs[i], successfulAIs[j]);
+                    var newChild = ChanceCrossover(successfulAIs[i], successfulAIs[j]);
                     newGeneration.Add(newChild);
                 }
             }
@@ -136,6 +143,34 @@ namespace genetic_algorithm
             VirtualMachines = newGeneration;
                 
 
+        }
+
+        private VirtualMachine ChanceCrossover(VirtualMachine parent1, VirtualMachine parent2)
+        {
+            var child = new VirtualMachine(ControlBounds);
+            var crossoverMemory = new List<Memory>();
+            var totalFitness = parent1.Fitness + parent2.Fitness;
+            var random = new Random();
+
+            for (int i = 0; i < parent1.Memory.Count; i++)
+            {
+                if(random.NextDouble() < (parent1.Fitness / totalFitness))
+                {
+                    crossoverMemory.Add(parent1.Memory[i]);
+                }
+                else
+                {
+                    crossoverMemory.Add(parent2.Memory[i]);
+
+                }
+
+            }
+
+            child.Memory = crossoverMemory.DeepClone();
+
+            child.Memory = Mutate(child.Memory);
+
+            return child;
         }
 
         private VirtualMachine Crossover(VirtualMachine parent1, VirtualMachine parent2)
@@ -196,6 +231,8 @@ namespace genetic_algorithm
             var pathData = Map.PerfromsSteps(machine.Steps);
             var position = pathData.Item1;
             var goldsCollected = pathData.Item2;
+            score -= machine.Steps.Count * 0.1;
+            bool wereNotCollectedGolds = false;
 
             foreach(var gold in goldsCollected)
             {
@@ -208,9 +245,10 @@ namespace genetic_algorithm
                     continue;
 
                 score += 1 / (Map.GetDistance(goldPosition, position)+1);
+                wereNotCollectedGolds = true;
             }
 
-            if(score >= maxPossibleFitness)
+            if(score >= maxPossibleFitness || !wereNotCollectedGolds)
             {
                 Console.Clear();
                 Console.WriteLine("Final AI found");
