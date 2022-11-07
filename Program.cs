@@ -7,13 +7,13 @@ namespace genetic_algorithm
     {
         public static void Main(string[] args)
         {
-            AICollection swarm = new AICollection(0.01);
+            AICollection swarm = new AICollection(0.05);
             string file = args.Length > 0 ? args[0] : "testMap.txt";
 
             Map startingMap = ReadMap(file);
             startingMap.PrintMap();
             swarm.SetupMap(startingMap);
-            swarm.InitializeAIs(20);
+            swarm.InitializeAIs(50);
 
             while (!swarm.SolutionFound)
                 swarm.DoGeneration();

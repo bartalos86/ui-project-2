@@ -4,12 +4,12 @@ namespace genetic_algorithm
     [Serializable]
     public class Memory
     {
-        public string Address { get; set; }
-        public string Value { get; set; }
+        public uint Address { get; set; }
+        public uint Value { get; set; }
 
         private int customSizeBits = 8;
 
-        public Memory(string address, string value, int customSizeBits = 8)
+        public Memory(uint address, uint value, int customSizeBits = 8)
         {
             Address = address;
             Value = value;
@@ -18,35 +18,32 @@ namespace genetic_algorithm
 
         public Instruction GetInstruction()
         {
-            return (Instruction) Convert.ToInt32(Value.Substring(0, 2), 2);
+            switch((Value & 192))
+            {
+                case 192: //11
+                    return Instruction.PRINT;
+                case 128: //10
+                    return Instruction.JUMP;
+                case 64: //01
+                    return Instruction.DECREMENT;
+                default:
+                    return Instruction.INCREMET;
+            }
         }
 
-        public string GetValue()
+        public uint GetValue()
         {
-            return Value.Substring(2, Value.Length - 2);
+            return (Value & 63);
         }
 
         public void IncrementValue()
         {
             var value = Value;
-            var intValue = Convert.ToInt32(value, 2) +1;
+            var intValue = value +1;
 
             if(intValue > 255)
             {
-                value = "0000000";
-
-                //while (value.Length < customSizeBits)
-                //{
-                //    value = value.Insert(0, "0");
-                //}
-            }
-            else
-            {
-                value = Convert.ToString(intValue, 2);
-                while (value.Length < customSizeBits)
-                {
-                   value = value.Insert(0, "0");
-                }
+                value = 0;
             }
 
             Value = value;
@@ -55,23 +52,11 @@ namespace genetic_algorithm
         public void DecrementValue()
         {
             var value = GetValue();
-            var intValue = Convert.ToInt32(value, 2) - 1;
+            var intValue = value - 1;
 
-            if (intValue <= 0)
+            if (intValue < 0)
             {
-                value = "1111111";
-                //while (value.Length < customSizeBits)
-                //{
-                //    value = value.Insert(0, "1");
-                //}
-            }
-            else
-            {
-                value = Convert.ToString(intValue, 2);
-                while (value.Length < customSizeBits)
-                {
-                    value = value.Insert(0, "0");
-                }
+                value = 255;
             }
 
             Value = value;
@@ -79,16 +64,16 @@ namespace genetic_algorithm
 
         public override string ToString()
         {
-            return "Address: " + Address + " ("+ Convert.ToInt32(Address,2) +") Value: " + Value + " GetValue: " + GetValue() ;
+            return "Address: " + Address + " ("+ Convert.ToString(Address,2) +") Value: " + Convert.ToString(Value,2) + " GetValue: " + GetValue() ;
         }
 
         public Step GetStep()
         {
             int numberOfOnes = 0;
-            foreach(char character in Value)
+            for(int i = 0; i < 8; i++)
             {
-                if (character == '1')
-                    numberOfOnes++;
+               if(Value.IsOneAtPosition(i))
+                numberOfOnes++;
             }
 
             int intervalAdjustment = (customSizeBits - 8); //12

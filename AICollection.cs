@@ -17,7 +17,7 @@ namespace genetic_algorithm
 
         private double maxPossibleFitness;
         private int customSize = 64;
-        private Func<double> goldWorth = () => 2;
+        private Func<double> goldWorth = () => 10 ;
 
         public AICollection(double chanceOfMutation = 0.01)
         {
@@ -28,7 +28,7 @@ namespace genetic_algorithm
 
         public void InitializeAIs(int count = 20)
         {
-            MaxAIs = count;
+            MaxAIs = count > 20 ? count /2 : count;
             for (int i = 0; i < count; i++)
             {
                 VirtualMachines.Add(new VirtualMachine(ControlBounds, customSize));
@@ -100,6 +100,9 @@ namespace genetic_algorithm
 
                 while (total < number)
                 {
+                    if (counter >= chanceDictionary.Count)
+                        break;
+
                     element = chanceDictionary[counter++];
                     total += element.Item1;
                 }
@@ -110,32 +113,38 @@ namespace genetic_algorithm
                
             }
 
+            //Elits
             for(int i  = 0; i< VirtualMachines.Count /4; i++)
             {
                 if (!successfulAIs.Contains(VirtualMachines[i]))
                     successfulAIs.Add(VirtualMachines[i]);
             }
 
-           
-
-            //No AIs were picked
-            if(successfulAIs.Count <= 5)
+            if(successfulAIs.Count <= 0)
             {
-                for (int i = 0; i < VirtualMachines.Count /2; i++)
-                    successfulAIs.Add(VirtualMachines[i]);
+                for (int i = 0; i < VirtualMachines.Count; i++)
+                {
+                        successfulAIs.Add(VirtualMachines[i]);
+                    Console.WriteLine("asd");
+                }
             }
 
             int maxCap = successfulAIs.Count <= MaxAIs ? successfulAIs.Count : MaxAIs;
             successfulAIs.Sort();
             successfulAIs.Reverse();
+            //successfulAIs.Reverse();
+
+            //foreach (var ai in  successfulAIs)
+            //    Console.WriteLine($"Fitness: {ai.Fitness}");
+
            var newGeneration = new List<VirtualMachine>();
            for(int i = 0; i < maxCap; i++)
             {
                 //Console.WriteLine("Fitness: " + successfulAIs[i].Fitness);
 
-                for (int j = i + 1;j < maxCap; j++)
+                for (int j = i + 1;j < maxCap/2; j++)
                 {
-                    var newChild = ChanceCrossover(successfulAIs[i], successfulAIs[j]);
+                    var newChild = Crossover(successfulAIs[i], successfulAIs[j]);
                     newGeneration.Add(newChild);
                 }
             }
@@ -156,11 +165,11 @@ namespace genetic_algorithm
             {
                 if(random.NextDouble() < (parent1.Fitness / totalFitness))
                 {
-                    crossoverMemory.Add(parent1.Memory[i]);
+                    crossoverMemory.Add(parent1.Memory[i].DeepClone());
                 }
                 else
                 {
-                    crossoverMemory.Add(parent2.Memory[i]);
+                    crossoverMemory.Add(parent2.Memory[i].DeepClone());
 
                 }
 
@@ -188,7 +197,7 @@ namespace genetic_algorithm
 
             }
 
-            child.Memory = crossoverMemory.DeepClone();
+            child.Memory = crossoverMemory;
 
             child.Memory = Mutate(child.Memory);
 
@@ -198,28 +207,31 @@ namespace genetic_algorithm
         private List<Memory> Mutate(List<Memory> completeMemory)
         {
             var random = new Random();
+            var newMemory = new List<Memory>();
+            
             foreach(var memory in completeMemory)
             {
-                for(int i = 0; i < memory.Value.Length; i++)
+                for(int i = 0; i < 8; i++)
                 {
                     
                     if (random.NextDouble() <= ChanceOfMutation)
                     {
-                        StringBuilder modified = new StringBuilder(memory.Value);
+                        //Console.WriteLine($"Before {memory.Value}");
 
-                        if (memory.Value[i] == '0')
-                            modified[i] = '1';
+                        if (!memory.Value.IsOneAtPosition(i))
+                        {
+                            memory.Value = (memory.Value | (uint)Math.Pow(2, 8 - i - 1));
+                        }
                         else
-                            modified[i] = '0';
+                            memory.Value = (memory.Value & (255-(uint)Math.Pow(2, 8-i-1)));
 
-                        memory.Value = modified.ToString();
-
-
+                        //Console.WriteLine($"After {memory.Value}");
                     }
                 }
+                newMemory.Add(memory);
             }
 
-            return completeMemory;
+            return newMemory;
         }
 
         private double FitnessFunction(VirtualMachine machine) {
@@ -231,10 +243,14 @@ namespace genetic_algorithm
             var pathData = Map.PerfromsSteps(machine.Steps);
             var position = pathData.Item1;
             var goldsCollected = pathData.Item2;
-            score -= machine.Steps.Count * 0.1;
+            //score -= machine.Steps.Count * 0.05;
             bool wereNotCollectedGolds = false;
 
-            foreach(var gold in goldsCollected)
+            //var rightSteps = machine.Steps.FindAll((step) => step == Step.P);
+            //score -= rightSteps.Count * 0.1;
+            //score -= machine.Steps.FindAll((step) => step == Step.H).Count * 0.1;
+
+            foreach (var gold in goldsCollected)
             {
                 score += goldWorth.Invoke();
             }
@@ -244,7 +260,7 @@ namespace genetic_algorithm
                 if (goldsCollected.ContainsByHash(goldPosition))
                     continue;
 
-                score += 1 / (Map.GetDistance(goldPosition, position)+1);
+                score += 2 / (Map.GetDistance(goldPosition, position)+1);
                 wereNotCollectedGolds = true;
             }
 

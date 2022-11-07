@@ -30,12 +30,12 @@ namespace genetic_algorithm
             int nearestSize = (int) Math.Pow(2, customBits-2);
             
 
-            for (int i = 0; i < nearestSize; i++)
+            for (uint i = 0; i < nearestSize; i++)
             {
                 var binaryValue = GenerateBinaryValue(customBits);
-                var binaryAddress = GenerateAddress(i);
+                //var binaryAddress = GenerateAddress(i);
 
-                var memory = new Memory(binaryAddress, binaryValue, customBits);
+                var memory = new Memory(i, (uint)binaryValue, customBits);
                 Memory.Add(memory);
             }
         }
@@ -56,7 +56,7 @@ namespace genetic_algorithm
                 var memory = Memory[i];
                 var instuction = memory.GetInstruction();
                 var targetAddress = memory.GetValue();
-                var targetAddressIndex = Convert.ToInt32(targetAddress,2);
+                var targetAddressIndex = (int)targetAddress; //Convert.ToInt32(targetAddress,2);
                 //Console.WriteLine(instuction + ": " + targetAddressIndex);
                 if (instructionCounter >= 500)
                     break;
@@ -110,37 +110,38 @@ namespace genetic_algorithm
         }
 
 
-        private string GenerateAddress(int number)
+        private int GenerateAddress(int number)
         {
-            var binaryAddress = new StringBuilder(Convert.ToString(number, 2));
+            //var binaryAddress = new StringBuilder(Convert.ToString(number, 2));
             Random random = new Random();
 
-            while (binaryAddress.Length < customSize-2)
-            {
-                binaryAddress.Insert(0, "0");
-            }
+            //while (binaryAddress.Length < customSize-2)
+            //{
+            //    binaryAddress.Insert(0, "0");
+            //}
 
-            return binaryAddress.ToString();
+            return random.Next();
 
         }
 
-        private static string GenerateBinaryValue(int length = 8)
+        private static int GenerateBinaryValue(int length = 8)
         {
-            var value = new StringBuilder();
             Random random = new Random();
-            for (int i = 0; i < length; i++)
-            {
-                if (random.Next(2) == 1)
-                {
-                    value.Append("1");
-                }
-                else
-                {
-                    value.Append("0");
-                }
-            }
+            //for (int i = 0; i < length; i++)
+            //{
+            //    if (random.Next(2) == 1)
+            //    {
+            //        value.Append("1");
+            //    }
+            //    else
+            //    {
+            //        value.Append("0");
+            //    }
+            //}
 
-            return value.ToString();
+
+
+            return random.Next((int)Math.Pow(2,length));
         }
 
         public int CompareTo(VirtualMachine? other)
