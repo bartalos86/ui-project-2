@@ -13,7 +13,7 @@ namespace genetic_algorithm
             Map startingMap = ReadMap(file);
             startingMap.PrintMap();
             swarm.SetupMap(startingMap);
-            swarm.InitializeAIs(100);
+            swarm.InitializeAIs(200);
 
             while (!swarm.SolutionFound)
             {

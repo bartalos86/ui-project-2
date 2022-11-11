@@ -386,9 +386,10 @@ namespace genetic_algorithm
             //{
             score = Math.Pow(goldWorth.Invoke(),goldsCollected.Count);
             //score = goldsCollected.Count * goldWorth.Invoke();
-            var stepPenalty = Math.Pow(1.45, machine.Steps.Count / 2);
+            var stepPenalty = Math.Pow(1.15, machine.Steps.Count / 2);
+            stepPenalty = machine.Steps.Count * goldWorth.Invoke() /1.5;
 
-            if(score - stepPenalty > 0.1)
+            if(score - stepPenalty > 0.1 && SolutionFound)
                 score = score - stepPenalty;
 
             // }
@@ -397,8 +398,8 @@ namespace genetic_algorithm
             {
                 if (goldsCollected.ContainsByHash(goldPosition))
                     continue;
-
-                score += Math.Pow(1.40,goldWorth.Invoke() / (Map.GetDistance(goldPosition, position)+1));
+                if(!SolutionFound)
+                score += Math.Pow(1.4,goldWorth.Invoke() / (Map.GetDistance(goldPosition, position)+1));
                 wereNotCollectedGolds = true;
             }
 
