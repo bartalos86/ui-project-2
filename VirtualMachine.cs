@@ -33,8 +33,6 @@ namespace genetic_algorithm
             for (uint i = 0; i < nearestSize; i++)
             {
                 var binaryValue = GenerateBinaryValue(customBits);
-                //var binaryAddress = GenerateAddress(i);
-
                 var memory = new Memory(i, (uint)binaryValue, customBits);
                 Memory.Add(memory);
             }
@@ -56,8 +54,7 @@ namespace genetic_algorithm
                 var memory = Memory[i];
                 var instuction = memory.GetInstruction();
                 var targetAddress = memory.GetValue();
-                var targetAddressIndex = (int)targetAddress; //Convert.ToInt32(targetAddress,2);
-                //Console.WriteLine(instuction + ": " + targetAddressIndex);
+                var targetAddressIndex = (int)targetAddress;
                 if (instructionCounter >= 500)
                     break;
 
@@ -80,7 +77,6 @@ namespace genetic_algorithm
 
                     if (!IsInBounds().Item1)
                     {
-                        //Steps.RemoveRange(IsInBounds().Item2, Steps.Count - IsInBounds().Item2);
                         Steps.RemoveAt(Steps.Count - 1);
                         break;
                     }
@@ -92,55 +88,14 @@ namespace genetic_algorithm
 
         }
 
-        public List<Step> GetSteps()
-        {
-            //Console.WriteLine("----------------------------------");
-            List<Step> steps = new List<Step>();
-            foreach(var memory in Memory)
-            {
-                steps.Add(memory.GetStep());
-            }
-
-            return steps;
-        }
-
         private (bool, int) IsInBounds()
         {
             return swarmBoundControl.Invoke(Steps);
         }
 
-
-        private int GenerateAddress(int number)
-        {
-            //var binaryAddress = new StringBuilder(Convert.ToString(number, 2));
-            Random random = new Random();
-
-            //while (binaryAddress.Length < customSize-2)
-            //{
-            //    binaryAddress.Insert(0, "0");
-            //}
-
-            return random.Next();
-
-        }
-
         private static int GenerateBinaryValue(int length = 8)
         {
             Random random = new Random();
-            //for (int i = 0; i < length; i++)
-            //{
-            //    if (random.Next(2) == 1)
-            //    {
-            //        value.Append("1");
-            //    }
-            //    else
-            //    {
-            //        value.Append("0");
-            //    }
-            //}
-
-
-
             return random.Next((int)Math.Pow(2,length));
         }
 

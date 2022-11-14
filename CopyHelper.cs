@@ -1,6 +1,5 @@
 ﻿using System.Runtime.Serialization.Formatters.Binary;
 
-
 namespace genetic_algorithm
 {
     //Helper class made to more easily clone objects in memory without retaining the references to the original nested instances

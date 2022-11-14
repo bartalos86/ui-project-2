@@ -1,7 +1,4 @@
 ﻿
-using System.Text;
-using System.Threading.Channels;
-
 namespace genetic_algorithm
 {
     public class AICollection
@@ -50,11 +47,15 @@ namespace genetic_algorithm
 
         public void InitializeAIs(int count = 20)
         {
-            MaxAIs = count; //> 20 ? count /2 : count;
+            //Initializes the virtual machines
+            MaxAIs = count;
             for (int i = 0; i < count; i++)
             {
                 VirtualMachines.Add(new VirtualMachine(ControlBounds, customSize));
             }
+            //Deletes the previous statistics
+            File.Delete("roulette_statistics.csv");
+            File.Delete("tournament_statistics.csv");
         }
 
         private (bool,int) ControlBounds(List<Step> steps)
@@ -101,12 +102,12 @@ namespace genetic_algorithm
                 Console.WriteLine($"Best fitness: {Math.Round(VirtualMachines[0].Fitness, 1)}");
                 Console.WriteLine($"Current generation: {Generation}");
                 System.Console.WriteLine($"Number of AIs: {VirtualMachines.Count}");
+                Log("tournament_statistics.csv");
             }
 
-   
+
 
             var requiredAiCount = Math.Max(MaxAIs / 3, Math.Sqrt(MaxAIs)+3);
-            Console.WriteLine($"Required ai cound: {requiredAiCount}");
 
             for(int i = 0; aisInTournament.Count < requiredAiCount; i++)
             {
@@ -171,12 +172,12 @@ namespace genetic_algorithm
             {
                 Console.Clear();
                 Map.PrintOutPath(VirtualMachines[0].Steps);
-                Console.WriteLine($"Average fitness: {Math.Round((totalFitness / VirtualMachines.Count), 1)}%");
+                Console.WriteLine($"Average fitness: {Math.Round((totalFitness / VirtualMachines.Count), 1)}");
                 Console.WriteLine($"Best fitness: {Math.Round(VirtualMachines[0].Fitness, 1)}");
                 Console.WriteLine($"Current generation: {Generation}");
                 System.Console.WriteLine($"Number of AIs: {VirtualMachines.Count}");
             }
-          
+            Log("roulette_statistics.csv");
 
             foreach (var vm in VirtualMachines)
             {
@@ -197,7 +198,7 @@ namespace genetic_algorithm
                     
             }
 
-            //Lottery
+            //Roulette
             int elitCount = successfulAIs.Count;
             for(int i = 0; i< MaxAIs - elitCount; i++)
             {
@@ -208,9 +209,6 @@ namespace genetic_algorithm
 
                 while (total < number)
                 {
-                    // if (counter >= chanceDictionary.Count)
-                    //     break;
-
                     element = chanceDictionary[counter++];
                     total += element.Item1;
                 }
@@ -235,7 +233,6 @@ namespace genetic_algorithm
                 }
                 else
                     i--;
-
             }
 
 
@@ -253,15 +250,11 @@ namespace genetic_algorithm
                 }
 
             }
+
             int maxCap = successfulAIs.Count <= MaxAIs ? successfulAIs.Count : MaxAIs;
-
-
-            Console.WriteLine($"Succesful count: {successfulAIs.Count}");
-
 
             for (int i = 0; i < maxCap; i++)
             {
-                //Console.WriteLine("Fitness: " + successfulAIs[i].Fitness);
 
                 for (int j = i + 1;j < maxCap; j++)
                 {
@@ -277,11 +270,7 @@ namespace genetic_algorithm
                     }
             }
 
-            Console.WriteLine($"New generation count: {newGeneration.Count}");
-
-
             VirtualMachines = newGeneration;
-                
 
         }
 
@@ -313,6 +302,7 @@ namespace genetic_algorithm
             return child;
         }
 
+        //Crossover function
         private VirtualMachine Crossover(VirtualMachine parent1, VirtualMachine parent2)
         {
             var child = new VirtualMachine(ControlBounds);
@@ -337,6 +327,7 @@ namespace genetic_algorithm
             return child;
         }
 
+        //Muatates a whole genome
         private List<Memory> Mutate(List<Memory> completeMemory)
         {
             var random = new Random();
@@ -346,19 +337,14 @@ namespace genetic_algorithm
             {
                 for(int i = 0; i < 8; i++)
                 {
-                    
                     if (random.NextDouble() <= ChanceOfMutation)
                     {
-                        //Console.WriteLine($"Before {memory.Value}");
-
                         if (!memory.Value.IsOneAtPosition(i))
                         {
                             memory.Value = (memory.Value | (uint)Math.Pow(2, 8 - i - 1));
                         }
                         else
                             memory.Value = (memory.Value & (255-(uint)Math.Pow(2, 8-i-1)));
-
-                        //Console.WriteLine($"After {memory.Value}");
                     }
                 }
                 newMemory.Add(memory);
@@ -367,6 +353,7 @@ namespace genetic_algorithm
             return newMemory;
         }
 
+        //Determines the fitness of tthe VMs, a reference for this method is passed to the VMs
         private double FitnessFunction(VirtualMachine machine) {
 
             double score = 0.01;
@@ -378,21 +365,15 @@ namespace genetic_algorithm
             var goldsCollected = pathData.Item2;
             bool wereNotCollectedGolds = false;
 
-            //var rightSteps = machine.Steps.FindAll((step) => step == Step.P);
-            //score -= rightSteps.Count * 0.1;
-            //score -= machine.Steps.FindAll((step) => step == Step.H).Count * 0.1;
-
-            // foreach (var gold in goldsCollected)
-            //{
             score = Math.Pow(goldWorth.Invoke(),goldsCollected.Count);
-            //score = goldsCollected.Count * goldWorth.Invoke();
-            var stepPenalty = Math.Pow(1.15, machine.Steps.Count / 2);
-            stepPenalty = machine.Steps.Count * goldWorth.Invoke() /1.5;
 
-            if(score - stepPenalty > 0.1 && SolutionFound)
+            //Penalization for steps
+            var stepPenalty = Math.Pow(1.20, machine.Steps.Count / 5);
+
+            if (score - stepPenalty > 0.1)
                 score = score - stepPenalty;
-
-            // }
+            else
+                score = 0.1;
 
             foreach (var goldPosition in Map.GoldPositions)
             {
@@ -411,11 +392,28 @@ namespace genetic_algorithm
                 System.Console.WriteLine($"Number of AIs: {VirtualMachines.Count}");
                 Console.WriteLine($"Total generations: {Generation}");
                 Map.PrintOutPath(machine.Steps);
+
+                foreach (var step in machine.Steps)
+                    Console.Write(step.ToString());
+
                 SolutionFound = true;
             }
 
             return score;
 
+        }
+
+        private void Log(string filename)
+        {
+            double totalFitness = 0;
+            foreach (var vm in VirtualMachines)
+                totalFitness += vm.Fitness;
+
+            
+            using (StreamWriter writer = new StreamWriter(filename,true))
+            {
+                writer.WriteLine($"{totalFitness / VirtualMachines.Count};{Generation}");
+            }
         }
 
     }

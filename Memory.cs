@@ -16,6 +16,7 @@ namespace genetic_algorithm
             this.customSizeBits = customSizeBits;
         }
 
+        //Gets the instruction part from the value and converts it to the appropriate Instruction enum
         public Instruction GetInstruction()
         {
             switch((Value & 192))

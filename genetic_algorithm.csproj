@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Submit\**" />
+    <EmbeddedResource Remove="Submit\**" />
+    <None Remove="Submit\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="bigBoyMap.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
