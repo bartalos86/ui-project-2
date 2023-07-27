@@ -17,6 +17,7 @@ Submit/
 *.docx
 *csv
 *.xlsx
+.DS_Store
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
