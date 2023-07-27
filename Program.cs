@@ -9,7 +9,7 @@ namespace genetic_algorithm
         {
             var config = ShowMenu();
             AICollection swarm = new AICollection(config.Item1, config.Item2, config.Item3);
-            string file = args.Length > 0 ? args[0] : "testMap.txt";
+            string file = args.Length > 0 ? args[0] : "Maps/testMap.txt";
 
             Map startingMap = ReadMap(file);
             startingMap.PrintMap();
