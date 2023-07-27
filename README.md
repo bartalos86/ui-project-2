@@ -2,18 +2,18 @@
 As an assignment we had to implement a genetic algorthm which is capable of finding the most amount of treasures on the map with the minimal path. 
 
 ## How does it work
-The base of the algorithm are the virtual machines which have predefined number of "genes", these genes are instructions which are one of the four possible instruction types: 
+The base of the algorithm are virtual machines which have predefined number of "genes", these genes are instructions which are one of the four possible instruction types: 
 - INCREMET = 0,
 - DECREMENT = 1,
 - JUMP = 2,
 - PRINT = 3
 
-When one instruction is executed it can affect other genes, for example INCREMENT will increment the genes value which it is pointing to, same with the DECREMENT, JUMP will jump to the target gene and execute its instruction. The PRINT instruction is the final instruction in the execution of a virtual machine, when a PRINT instruction is reached the values are read which were generated during the execution of the virtual machine and executed as steps.
+When one instruction is executed it can affect other genes, for example INCREMENT will increment the gene's value which it is pointing to, same with the DECREMENT, JUMP will jump to the target gene and execute it's instruction. The PRINT instruction is the final instruction in the execution of a virtual machine, when a PRINT instruction is reached the values which were generated during the execution of the virtual machine are read and executed as steps.
 
-Each machine is rated after a it finished execting its steps. Then the most successful machines are mutated and crossed over.
+Each machine is rated after it finishes executing it's steps. Then the most successful machine's genes are mutated and crossed over.
 This implementation includes ELITISM, which means the most successful machines automatically go into the next generation without being crossed over with other machines.
 
-The program features different selection and crossover types which the used can choose as he likes.
+The program features different selection and crossover types which the user can choose as he likes:
 
 ### Selection types:
 - Roulette selection
@@ -39,7 +39,7 @@ gold;4;5
 The first line is always the size of the map, the second line will be the starting position of the AIs, after that desired amount of tresures can be defined.
 
 ### How to run the program
-- in `Program.cs` configure the map's location (its hardcoded)
+- in `Program.cs` configure the map's location (it's hardcoded)
 - `dotnet run`
 - set the required prameters in terminal
 - leave the algorithm do its thing :)
