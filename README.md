@@ -26,15 +26,23 @@ The program features different selection and crossover types which the used can 
 ## Input
 The program is capable of reading the input from .txt files where the map should be defined in the following format:
 
-`size;7;7
+```
+size;7;7
 start;3;6
 gold;4;1
 gold;2;2
 gold;6;3
 gold;1;4
-gold;4;5`
+gold;4;5
+```
 
 The first line is always the size of the map, the second line will be the starting position of the AIs, after that desired amount of tresures can be defined.
+
+### How to run the program
+- in `Program.cs` configure the map's location (its hardcoded)
+- `dotnet run`
+- set the required prameters in terminal
+- leave the algorithm do its thing :)
 
 <img src="/Showcase/result.png">
 
